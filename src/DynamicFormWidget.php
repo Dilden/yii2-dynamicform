@@ -41,6 +41,12 @@ class DynamicFormWidget extends \yii\base\Widget
      * @var string
      */
     public $insertButton;
+
+    /**
+     * @var string
+     */
+    public $cloneButton;
+
      /**
      * @var string
      */
@@ -127,6 +133,7 @@ class DynamicFormWidget extends \yii\base\Widget
         $this->_options['widgetItem']      = $this->widgetItem;
         $this->_options['limit']           = $this->limit;
         $this->_options['insertButton']    = $this->insertButton;
+        $this->_options['cloneButton']     = $this->cloneButton;
         $this->_options['deleteButton']    = $this->deleteButton;
         $this->_options['insertPosition']  = $this->insertPosition;
         $this->_options['formId']          = $this->formId;
@@ -206,6 +213,14 @@ class DynamicFormWidget extends \yii\base\Widget
         $js .= "    e.preventDefault();\n";
         $js .= '    jQuery(".' .  $this->widgetContainer . '").triggerHandler("beforeInsert", [jQuery(this)]);' . "\n";
         $js .= '    jQuery(".' .  $this->widgetContainer . '").yiiDynamicForm("addItem", '. $this->_hashVar . ", e, jQuery(this));\n";
+        $js .= "});\n";
+        $view->registerJs($js, $view::POS_READY);
+
+        // add a click handler for the ++REAL++ clone button
+        $js = 'jQuery("#' . $this->formId . '").on("click", "' . $this->cloneButton . '", function(e) {'. "\n";
+        $js .= "    e.preventDefault();\n";
+        $js .= '    jQuery(".' .  $this->widgetContainer . '").triggerHandler("beforeInsert", [jQuery(this)]);' . "\n";
+        $js .= '    jQuery(".' .  $this->widgetContainer . '").yiiDynamicForm("cloneItem", '. $this->_hashVar . ", e, jQuery(this));\n";
         $js .= "});\n";
         $view->registerJs($js, $view::POS_READY);
 
