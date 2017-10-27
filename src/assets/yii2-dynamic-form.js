@@ -40,6 +40,7 @@
 
         addItem: function (widgetOptions, e, $elem) {
            _addItem(widgetOptions, e, $elem, false);
+           console.log("add");
         },
 
         cloneItem: function (widgetOptions, e, $elem) {
