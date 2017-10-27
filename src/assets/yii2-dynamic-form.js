@@ -34,17 +34,16 @@
     var methods = {
         init: function (widgetOptions) {
             return this.each(function () {
-                widgetOptions.template = _parseTemplate(widgetOptions, false);
+                widgetOptions.template = _parseTemplate(widgetOptions);
             });
         },
 
         addItem: function (widgetOptions, e, $elem) {
-           _addItem(widgetOptions, e, $elem);
+           _addItem(widgetOptions, e, $elem, false);
         },
 
         cloneItem: function (widgetOptions, e, $elem) {
-            widgetOptions.template = _parseTemplate(widgetOptions, true);
-           _addItem(widgetOptions, e, $elem);
+           _addItem(widgetOptions, e, $elem, true);
         },
 
         deleteItem: function (widgetOptions, e, $elem) {
@@ -59,7 +58,7 @@
         }
     };
 
-    var _parseTemplate = function(widgetOptions, duplicate) {
+    var _parseTemplate = function(widgetOptions) {
 
         var $template = $(widgetOptions.template);
         $template.find('div[data-dynamicform]').each(function(){
@@ -70,27 +69,26 @@
             }
         });
 
-        if(!duplicate) {
-            $template.find('input, textarea, select').each(function() {
-                if ($(this).is(':checkbox') || $(this).is(':radio')) {
-                    var type         = ($(this).is(':checkbox')) ? 'checkbox' : 'radio';
-                    var inputName    = $(this).attr('name');
-                    var $inputHidden = $template.find('input[type="hidden"][name="' + inputName + '"]').first();
-                    var count        = $template.find('input[type="' + type +'"][name="' + inputName + '"]').length;
+        
+        $template.find('input, textarea, select').each(function() {
+            if ($(this).is(':checkbox') || $(this).is(':radio')) {
+                var type         = ($(this).is(':checkbox')) ? 'checkbox' : 'radio';
+                var inputName    = $(this).attr('name');
+                var $inputHidden = $template.find('input[type="hidden"][name="' + inputName + '"]').first();
+                var count        = $template.find('input[type="' + type +'"][name="' + inputName + '"]').length;
 
-                    if ($inputHidden && count === 1) {
-                        $(this).val(1);
-                        $inputHidden.val(0);
-                    }
-
-                    $(this).prop('checked', false);
-                } else if($(this).is('select')) {
-                    $(this).find('option:selected').removeAttr("selected");
-                } else {
-                    $(this).val(''); 
+                if ($inputHidden && count === 1) {
+                    $(this).val(1);
+                    $inputHidden.val(0);
                 }
-            });
-        }
+
+                $(this).prop('checked', false);
+            } else if($(this).is('select')) {
+                $(this).find('option:selected').removeAttr("selected");
+            } else {
+                $(this).val(''); 
+            }
+        });
 
         // remove "error/success" css class
         var yiiActiveFormData = $('#' + widgetOptions.formId).yiiActiveForm('data');
@@ -118,12 +116,17 @@
         return new Array(level + 2).join('0').split('');
     };
 
-    var _addItem = function(widgetOptions, e, $elem) {
+    var _addItem = function(widgetOptions, e, $elem, isClone) {
         var count = _count($elem, widgetOptions);
 
         if (count < widgetOptions.limit) {
             $toclone = widgetOptions.template;
-            $newclone = $toclone.clone(false, false);
+            if(isClone) {
+                $newclone = $toclone.clone(true).off();
+            }
+            else {
+                $newclone = $toclone.clone(false, false);
+            }
 
             if (widgetOptions.insertPosition === 'top') {
                 $elem.closest('.' + widgetOptions.widgetContainer).find(widgetOptions.widgetBody).prepend($newclone);
