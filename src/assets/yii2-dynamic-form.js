@@ -40,10 +40,10 @@
 
         addItem: function (widgetOptions, e, $elem) {
            _addItem(widgetOptions, e, $elem, false);
-           console.log("add");
         },
 
         cloneItem: function (widgetOptions, e, $elem) {
+            // attempting to reset the template here
             widgetOptions.template = _parseTemplate(widgetOptions, true);
            _addItem(widgetOptions, e, $elem, true);
         },
