@@ -8,11 +8,10 @@
 namespace wbraganca\dynamicform;
 
 use Yii;
-use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\CssSelector\CssSelector;
-use yii\helpers\Json;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\base\InvalidConfigException;
+use Symfony\Component\DomCrawler\Crawler;
 
 /**
  * yii2-dynamicform is widget to yii2 framework to clone form elements in a nested manner, maintaining accessibility.
@@ -42,6 +41,12 @@ class DynamicFormWidget extends \yii\base\Widget
      * @var string
      */
     public $insertButton;
+
+    /**
+     * @var string
+     */
+    public $cloneButton;
+
      /**
      * @var string
      */
@@ -128,6 +133,7 @@ class DynamicFormWidget extends \yii\base\Widget
         $this->_options['widgetItem']      = $this->widgetItem;
         $this->_options['limit']           = $this->limit;
         $this->_options['insertButton']    = $this->insertButton;
+        $this->_options['cloneButton']     = $this->cloneButton;
         $this->_options['deleteButton']    = $this->deleteButton;
         $this->_options['insertPosition']  = $this->insertPosition;
         $this->_options['formId']          = $this->formId;
@@ -210,6 +216,14 @@ class DynamicFormWidget extends \yii\base\Widget
         $js .= "});\n";
         $view->registerJs($js, $view::POS_READY);
 
+        // add a click handler for the ++REAL++ clone button
+        $js = 'jQuery("#' . $this->formId . '").on("click", "' . $this->cloneButton . '", function(e) {'. "\n";
+        $js .= "    e.preventDefault();\n";
+        $js .= '    jQuery(".' .  $this->widgetContainer . '").triggerHandler("beforeInsert", [jQuery(this)]);' . "\n";
+        $js .= '    jQuery(".' .  $this->widgetContainer . '").yiiDynamicForm("cloneItem", '. $this->_hashVar . ", e, jQuery(this));\n";
+        $js .= "});\n";
+        $view->registerJs($js, $view::POS_READY);
+
         // add a click handler for the remove button
         $js = 'jQuery("#' . $this->formId . '").on("click", "' . $this->deleteButton . '", function(e) {'. "\n";
         $js .= "    e.preventDefault();\n";
@@ -258,22 +272,14 @@ class DynamicFormWidget extends \yii\base\Widget
      */
     private function removeItems($content)
     {
-        $document = new \DOMDocument('1.0', \Yii::$app->charset);
         $crawler = new Crawler();
         $crawler->addHTMLContent($content, \Yii::$app->charset);
-        $root = $document->appendChild($document->createElement('_root'));
-        $crawler->rewind();
-        $root->appendChild($document->importNode($crawler->current(), true));
-        $domxpath = new \DOMXPath($document);
-        $crawlerInverse = $domxpath->query(CssSelector::toXPath($this->widgetItem));
+        $crawler->filter($this->widgetItem)->each(function ($nodes) {
+            foreach ($nodes as $node) {
+                $node->parentNode->removeChild($node);
+            }
+        });
 
-        foreach ($crawlerInverse as $elementToRemove) {
-            $parent = $elementToRemove->parentNode;
-            $parent->removeChild($elementToRemove);
-        }
-
-        $crawler->clear();
-        $crawler->add($document);
-        return $crawler->filter('body')->eq(0)->html();
+        return $crawler->html();
     }
 }
