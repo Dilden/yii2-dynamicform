@@ -6,7 +6,7 @@ yii2-dynamicform
 [![Total Downloads](https://img.shields.io/packagist/dt/wbraganca/yii2-dynamicform.svg?style=flat-square)](https://packagist.org/packages/wbraganca/yii2-dynamicform)
 
 
-It is widget to yii2 framework to clone form elements in a nested manner, maintaining accessibility.
+This is a Yii2 widget for use with the Yii2 framework to clone form elements in a nested manner, maintaining accessibility.
 ![yii2-dynamicform](http://wbraganca.com/img/yii2-dynamicform/sample.jpg)
 
 Installation
